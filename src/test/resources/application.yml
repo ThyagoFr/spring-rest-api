@@ -1,0 +1,22 @@
+spring:
+  main:
+    banner-mode: off
+  profiles:
+    active: test
+  application:
+    name: space-flight-news-integration
+  datasource:
+    username: test
+    password: test
+    database: testdb
+    url: jdbc:postgresql://localhost:5432/testdb
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: none
+  sql:
+    init:
+      mode: always
+
+server:
+  port: 8080

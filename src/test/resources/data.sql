@@ -1,0 +1,2 @@
+INSERT INTO articles(featured,title,url,image_url,news_site,summary,published_at,launches,events)
+VALUES(TRUE, 'Test 1', 'url1.com', 'image1url.com', 'news1', 'summary1', CURRENT_DATE, '[{"id":"launchID1","provider":"launch1"}]', '[{"id":"eventID1","provider":"event1"}]');
