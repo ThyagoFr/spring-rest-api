@@ -50,9 +50,9 @@ public class ArticleControllerTest {
         mongoDBContainer.start();
     }
 
-    private final List<Article> articles = articlesMock();
+    private static final List<Article> ARTICLES = articlesMock();
 
-    private final String ARTICLE_BASE_URL = "/articles";
+    private static final String ARTICLE_BASE_URL = "/articles";
 
     @LocalServerPort
     private int serverPort;
@@ -71,8 +71,8 @@ public class ArticleControllerTest {
     @BeforeAll
     void setup() {
         port = this.serverPort;
-        basePath = this.ARTICLE_BASE_URL;
-        this.articleRepository.saveAll(this.articles);
+        basePath = ARTICLE_BASE_URL;
+        this.articleRepository.saveAll(ARTICLES);
     }
 
     @AfterAll
@@ -84,7 +84,7 @@ public class ArticleControllerTest {
     @DisplayName("Test 1 - Search for article must return valid article")
     public void searchValidArticle() {
         // Given
-        var article = this.articles.get(0);
+        var article = ARTICLES.get(0);
 
         // Act - Assert
         given()
@@ -116,7 +116,7 @@ public class ArticleControllerTest {
     @DisplayName("Test 3 - Delete valid article must return no content")
     public void deleteValidArticle() {
         // Given
-        var article = this.articles.get(0);
+        var article = ARTICLES.get(0);
 
         // Act - Assert
         given()
