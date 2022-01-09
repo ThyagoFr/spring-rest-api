@@ -5,13 +5,16 @@ spring:
     name: space-flight-news-integration
   profiles:
     active: test
-
-scheduling:
-  enable: false
+  batch:
+    job:
+      enable: false
 
 integration:
   error:
     topic: integration.error.topic
+
+scheduling:
+  fix-rate: 3600000
 
 space:
   flight:

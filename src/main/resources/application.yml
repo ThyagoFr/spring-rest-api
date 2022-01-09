@@ -22,7 +22,6 @@ spring:
                 headers: false
 
 scheduling:
-  enable: true
   fix-rate: 3600000
 
 integration:

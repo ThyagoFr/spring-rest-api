@@ -15,12 +15,12 @@ public class IntegrationErrorProducer implements IntegrationErrorNotifier {
 
     private final Logger LOGGER = LoggerFactory.getLogger(IntegrationErrorProducer.class);
 
-    private final KafkaTemplate kafkaTemplate;
+    private final KafkaTemplate<String, ErrorIntegrationMessage> kafkaTemplate;
 
     @Value(value = "${integration.error.topic}")
     private String topic;
 
-    public IntegrationErrorProducer(KafkaTemplate kafkaTemplate) {
+    public IntegrationErrorProducer(KafkaTemplate<String, ErrorIntegrationMessage> kafkaTemplate) {
         this.kafkaTemplate = kafkaTemplate;
     }
 
