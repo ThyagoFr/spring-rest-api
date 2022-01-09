@@ -19,6 +19,7 @@ dependencies {
     implementation 'org.mapstruct:mapstruct:1.4.2.Final'
     implementation 'org.springframework.cloud:spring-cloud-starter-openfeign:3.1.0'
     implementation 'javax.validation:validation-api:2.0.1.Final'
+    implementation 'org.springframework.kafka:spring-kafka'
 
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
 

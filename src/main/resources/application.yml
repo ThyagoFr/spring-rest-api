@@ -8,10 +8,26 @@ spring:
       uri: mongodb://thyagofr:password@localhost:27017/test?authSource=admin
       database: test
       authentication-database: admin
+  kafka:
+    producer:
+      bootstrap-servers: localhost:9092
+      keySerializer: org.apache.kafka.common.serialization.StringSerializer
+      valueSerializer: org.apache.kafka.support.serializer.JsonSerializer
+    consumer:
+      properties:
+        spring:
+          json:
+            add:
+              type:
+                headers: false
 
 scheduling:
   enable: true
   fix-rate: 3600000
+
+error:
+  integration:
+    topic: integration.error.topic
 
 space:
   flight:

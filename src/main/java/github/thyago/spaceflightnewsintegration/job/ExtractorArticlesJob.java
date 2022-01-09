@@ -1,5 +1,7 @@
 package github.thyago.spaceflightnewsintegration.job;
 
+import github.thyago.spaceflightnewsintegration.domain.model.ErrorIntegrationMessage;
+import github.thyago.spaceflightnewsintegration.producer.kafka.KafkaProducer;
 import github.thyago.spaceflightnewsintegration.service.ArticleService;
 import github.thyago.spaceflightnewsintegration.service.spaceflightapi.client.APIClient;
 import github.thyago.spaceflightnewsintegration.service.spaceflightapi.exception.UnavailableAPIException;
@@ -24,17 +26,26 @@ import java.util.List;
 public class ExtractorArticlesJob {
 
     private static int sleepInMilliseconds = 10000;
+
     private final ArticleService articleService;
+
     private final APIClient apiClient;
+
     private final ArticleMapper articleMapper;
+
+    private final KafkaProducer<ErrorIntegrationMessage> kafkaProducer;
+
     private final int LIMIT_PER_REQUEST = 1000;
+
     private final Logger LOGGER = LoggerFactory.getLogger(ExtractorArticlesJob.class);
+
     private int tentatives = 3;
 
-    public ExtractorArticlesJob(ArticleService articleService, APIClient apiClient, ArticleMapper articleMapper) {
+    public ExtractorArticlesJob(ArticleService articleService, APIClient apiClient, ArticleMapper articleMapper, KafkaProducer<ErrorIntegrationMessage> kafkaProducer) {
         this.articleService = articleService;
         this.apiClient = apiClient;
         this.articleMapper = articleMapper;
+        this.kafkaProducer = kafkaProducer;
     }
 
     @Scheduled(fixedRateString = "${scheduling.fix-rate}")
@@ -55,6 +66,7 @@ public class ExtractorArticlesJob {
                 }
             }
         } catch (Exception exception) {
+            this.kafkaProducer.
             this.LOGGER.error(exception.getMessage());
             this.LOGGER.error("Stopping extract articles process");
             return;
