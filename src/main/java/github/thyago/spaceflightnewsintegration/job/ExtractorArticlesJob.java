@@ -66,6 +66,7 @@ public class ExtractorArticlesJob {
                     totalArticles -= totalExtracted;
                     start += totalExtracted;
                 }
+                this.LOGGER.info("{} articles extracted with success", start);
             }
         } catch (Exception exception) {
             this.sendNotification(exception);

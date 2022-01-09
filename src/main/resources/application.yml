@@ -12,7 +12,7 @@ spring:
     producer:
       bootstrap-servers: localhost:9092
       keySerializer: org.apache.kafka.common.serialization.StringSerializer
-      valueSerializer: org.apache.kafka.support.serializer.JsonSerializer
+      valueSerializer: org.springframework.kafka.support.serializer.JsonDeserializer
     consumer:
       properties:
         spring:
