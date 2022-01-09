@@ -1,7 +1,7 @@
 package github.thyago.spaceflightnewsintegration.job;
 
 import github.thyago.spaceflightnewsintegration.domain.model.ErrorIntegrationMessage;
-import github.thyago.spaceflightnewsintegration.producer.kafka.KafkaProducer;
+import github.thyago.spaceflightnewsintegration.notifier.IntegrationErrorNotifier;
 import github.thyago.spaceflightnewsintegration.service.ArticleService;
 import github.thyago.spaceflightnewsintegration.service.spaceflightapi.client.APIClient;
 import github.thyago.spaceflightnewsintegration.service.spaceflightapi.exception.UnavailableAPIException;
@@ -15,6 +15,8 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 
 import java.util.List;
+
+import static java.time.LocalDateTime.now;
 
 @Configuration
 @ConditionalOnProperty(
@@ -33,7 +35,7 @@ public class ExtractorArticlesJob {
 
     private final ArticleMapper articleMapper;
 
-    private final KafkaProducer<ErrorIntegrationMessage> kafkaProducer;
+    private final IntegrationErrorNotifier notifier;
 
     private final int LIMIT_PER_REQUEST = 1000;
 
@@ -41,11 +43,11 @@ public class ExtractorArticlesJob {
 
     private int tentatives = 3;
 
-    public ExtractorArticlesJob(ArticleService articleService, APIClient apiClient, ArticleMapper articleMapper, KafkaProducer<ErrorIntegrationMessage> kafkaProducer) {
+    public ExtractorArticlesJob(ArticleService articleService, APIClient apiClient, ArticleMapper articleMapper, IntegrationErrorNotifier notifier) {
         this.articleService = articleService;
         this.apiClient = apiClient;
         this.articleMapper = articleMapper;
-        this.kafkaProducer = kafkaProducer;
+        this.notifier = notifier;
     }
 
     @Scheduled(fixedRateString = "${scheduling.fix-rate}")
@@ -66,7 +68,7 @@ public class ExtractorArticlesJob {
                 }
             }
         } catch (Exception exception) {
-            this.kafkaProducer.
+            this.sendNotification(exception);
             this.LOGGER.error(exception.getMessage());
             this.LOGGER.error("Stopping extract articles process");
             return;
@@ -104,4 +106,10 @@ public class ExtractorArticlesJob {
         }
         return 0;
     }
+
+    private void sendNotification(Exception exception) {
+        var message = new ErrorIntegrationMessage(exception.getMessage(), now());
+        this.notifier.notify(message);
+    }
+
 }

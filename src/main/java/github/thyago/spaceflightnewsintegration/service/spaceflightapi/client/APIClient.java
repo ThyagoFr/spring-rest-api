@@ -8,13 +8,13 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
 
-@FeignClient(url = "${space.flight.news-api.url}", name = "space.flight.news-api.client")
+@FeignClient(url = "${space.flight.server.url}", name = "space.flight.news-api.client")
 public interface APIClient {
 
-    @GetMapping("/count")
+    @GetMapping("/articles/count")
     CountArticlesResponse countArticles();
 
-    @GetMapping
+    @GetMapping("/articles")
     List<ArticleResponse> getArticlesPaginated(@RequestParam("_limit") Integer limit, @RequestParam("_start") Integer start);
 
 }

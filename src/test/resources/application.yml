@@ -9,10 +9,15 @@ spring:
 scheduling:
   enable: false
 
+integration:
+  error:
+    topic: integration.error.topic
+
 space:
   flight:
-    news-api:
-      url: https://api.spaceflightnewsapi.net/v3/articles
+    server:
+      url: http://localhost:9000
+      port: 9000
 
 server:
   port: 8080

@@ -1,11 +1,7 @@
 package github.thyago.spaceflightnewsintegration.repository;
 
 import github.thyago.spaceflightnewsintegration.domain.entity.Article;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.mongo.embedded.EmbeddedMongoAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest;
@@ -18,9 +14,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import java.util.List;
 
 import static github.thyago.spaceflightnewsintegration.util.ArticlesMock.articlesMock;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS;
 
 @Testcontainers

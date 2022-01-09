@@ -4,11 +4,7 @@ import github.thyago.spaceflightnewsintegration.domain.entity.Article;
 import github.thyago.spaceflightnewsintegration.repository.ArticleRepository;
 import github.thyago.spaceflightnewsintegration.web.dto.ArticleDTO;
 import io.restassured.http.ContentType;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
@@ -22,19 +18,13 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import java.util.List;
 
 import static github.thyago.spaceflightnewsintegration.util.ArticlesMock.articlesMock;
-import static io.restassured.RestAssured.basePath;
-import static io.restassured.RestAssured.given;
-import static io.restassured.RestAssured.port;
+import static io.restassured.RestAssured.*;
 import static java.time.LocalDateTime.now;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
-import static org.springframework.http.HttpStatus.BAD_REQUEST;
-import static org.springframework.http.HttpStatus.CREATED;
-import static org.springframework.http.HttpStatus.NOT_FOUND;
-import static org.springframework.http.HttpStatus.NO_CONTENT;
-import static org.springframework.http.HttpStatus.OK;
+import static org.springframework.http.HttpStatus.*;
 
 @SpringBootTest(webEnvironment = RANDOM_PORT)
 @Testcontainers

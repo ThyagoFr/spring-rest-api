@@ -25,14 +25,14 @@ scheduling:
   enable: true
   fix-rate: 3600000
 
-error:
-  integration:
+integration:
+  error:
     topic: integration.error.topic
 
 space:
   flight:
-    news-api:
-      url: https://api.spaceflightnewsapi.net/v3/articles
+    server:
+      url: https://api.spaceflightnewsapi.net/v3
 
 server:
   port: 8080
