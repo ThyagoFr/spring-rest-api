@@ -29,4 +29,5 @@ public class IntegrationErrorProducer implements IntegrationErrorNotifier {
         var messageKey = UUID.randomUUID().toString();
         this.kafkaTemplate.send(topic, messageKey, message);
     }
+
 }
