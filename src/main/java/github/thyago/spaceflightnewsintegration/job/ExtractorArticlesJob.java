@@ -16,6 +16,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 
 import java.util.List;
 
+import static java.lang.Thread.sleep;
 import static java.time.LocalDateTime.now;
 
 @Configuration
@@ -27,7 +28,13 @@ import static java.time.LocalDateTime.now;
 @EnableScheduling
 public class ExtractorArticlesJob {
 
-    private static int sleepInMilliseconds = 10000;
+    private static final int sleepInMilliseconds = 10000;
+
+    private static final int LIMIT_PER_REQUEST = 1000;
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ExtractorArticlesJob.class);
+
+    private static int TENTATIVES = 3;
 
     private final ArticleService articleService;
 
@@ -36,12 +43,6 @@ public class ExtractorArticlesJob {
     private final ArticleMapper articleMapper;
 
     private final IntegrationErrorNotifier notifier;
-
-    private final int LIMIT_PER_REQUEST = 1000;
-
-    private final Logger LOGGER = LoggerFactory.getLogger(ExtractorArticlesJob.class);
-
-    private int tentatives = 3;
 
     public ExtractorArticlesJob(ArticleService articleService, APIClient apiClient, ArticleMapper articleMapper, IntegrationErrorNotifier notifier) {
         this.articleService = articleService;
@@ -52,39 +53,37 @@ public class ExtractorArticlesJob {
 
     @Scheduled(fixedRateString = "${scheduling.fix-rate}")
     public void run() throws InterruptedException {
-        this.LOGGER.info("Start extract process");
+        LOGGER.info("Start extract process");
         try {
             var totalArticles = this.getTotalArticles();
-            this.LOGGER.info("Total articles found : {}", totalArticles);
+            LOGGER.info("Total articles found : {}", totalArticles);
             if (totalArticles > 0) {
                 var start = 0;
                 while (totalArticles != 0) {
-                    this.LOGGER.info("Requesting articles using start as : {}", start);
+                    LOGGER.info("Requesting articles using start as : {}", start);
                     var articles = this.extractArticles(start);
                     this.articleService.updateInBatch(this.articleMapper.dtoListToModelList(articles));
                     var totalExtracted = articles.size();
                     totalArticles -= totalExtracted;
                     start += totalExtracted;
                 }
-                this.LOGGER.info("{} articles extracted with success", start);
+                LOGGER.info("{} articles extracted with success", start);
             }
         } catch (Exception exception) {
             this.sendNotification(exception);
-            this.LOGGER.error(exception.getMessage());
-            this.LOGGER.error("Stopping extract articles process");
-            return;
+            LOGGER.error(exception.getMessage());
         }
-        this.LOGGER.info("End of extract process");
+        LOGGER.info("End of extract process");
     }
 
     private List<ArticleResponse> extractArticles(Integer start) throws InterruptedException {
-        while (this.tentatives > 0) {
+        while (this.TENTATIVES > 0) {
             try {
-                return this.apiClient.getArticlesPaginated(this.LIMIT_PER_REQUEST, start);
+                return this.apiClient.getArticlesPaginated(LIMIT_PER_REQUEST, start);
             } catch (UnavailableAPIException unavailableAPIException) {
-                tentatives--;
-                this.LOGGER.error(unavailableAPIException.getMessage());
-                Thread.sleep(this.sleepInMilliseconds);
+                TENTATIVES--;
+                LOGGER.error(unavailableAPIException.getMessage());
+                sleep(sleepInMilliseconds);
             } catch (Exception exception) {
                 throw exception;
             }
@@ -93,14 +92,14 @@ public class ExtractorArticlesJob {
     }
 
     private int getTotalArticles() throws InterruptedException {
-        while (this.tentatives > 0) {
-            this.LOGGER.info("Trying extract articles from Space Flight News API...");
+        while (this.TENTATIVES > 0) {
+            LOGGER.info("Trying extract articles from Space Flight News API...");
             try {
                 return this.apiClient.countArticles().getCount();
             } catch (UnavailableAPIException unavailableAPIException) {
-                tentatives--;
-                this.LOGGER.error(unavailableAPIException.getMessage());
-                Thread.sleep(this.sleepInMilliseconds);
+                TENTATIVES--;
+                LOGGER.error(unavailableAPIException.getMessage());
+                sleep(sleepInMilliseconds);
             } catch (Exception exception) {
                 throw exception;
             }
