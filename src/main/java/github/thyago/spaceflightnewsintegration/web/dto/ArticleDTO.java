@@ -1,25 +1,38 @@
-package github.thyago.spaceflightnewsintegration.domain.entity;
+package github.thyago.spaceflightnewsintegration.web.dto;
 
 import github.thyago.spaceflightnewsintegration.domain.model.Event;
 import github.thyago.spaceflightnewsintegration.domain.model.Launch;
-import org.springframework.data.mongodb.core.mapping.Document;
 
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.List;
 
-@Document(collection = "articles")
-public class Article extends BaseEntity {
+public class ArticleDTO implements Serializable {
 
-    private boolean featured;
+    private static final long serialVersionUID = -4183333662322940728L;
 
+    private String id;
+
+    private String createdAt;
+
+    @NotNull(message = "user must provide featured property")
+    private Boolean featured;
+
+    @NotBlank(message = "user must provide title property")
+    @Min(value = 10, message = "user must provide a title with more than 10 characters")
     private String title;
 
+    @NotBlank(message = "user must provide url property")
     private String url;
 
     private String imageUrl;
 
     private String newsSite;
 
+    @NotBlank(message = "user must provide summary property")
     private String summary;
 
     private LocalDateTime publishedAt;
@@ -28,14 +41,30 @@ public class Article extends BaseEntity {
 
     private List<Event> events;
 
-    public Article() {
+    public ArticleDTO() {
     }
 
-    public boolean isFeatured() {
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public String getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(String createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public Boolean isFeatured() {
         return featured;
     }
 
-    public void setFeatured(boolean featured) {
+    public void setFeatured(Boolean featured) {
         this.featured = featured;
     }
 
@@ -102,5 +131,4 @@ public class Article extends BaseEntity {
     public void setEvents(List<Event> events) {
         this.events = events;
     }
-
 }

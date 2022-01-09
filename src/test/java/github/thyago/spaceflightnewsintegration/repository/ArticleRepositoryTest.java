@@ -1,63 +1,75 @@
 package github.thyago.spaceflightnewsintegration.repository;
 
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.DisplayName;
+import github.thyago.spaceflightnewsintegration.domain.entity.Article;
+import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.autoconfigure.mongo.embedded.EmbeddedMongoAutoConfiguration;
+import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
-import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.containers.MongoDBContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static github.thyago.spaceflightnewsintegration.util.ArticlesMock.articlesMock;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS;
 
-@DataJpaTest
 @Testcontainers
-@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
+@DataMongoTest(excludeAutoConfiguration = EmbeddedMongoAutoConfiguration.class)
+@TestInstance(PER_CLASS)
 public class ArticleRepositoryTest {
 
-    private static String POSTGRESQL_IMAGE = "postgres:latest";
+    private static String MONGODB_IMAGE = "mongo:4.4.2";
 
-    private static String DATABASE_NAME = "test_db";
-
-    private static String DATABASE_USERNAME = "user_test";
-
-    private static String DATABASE_PASSWORD = "password_test";
+    private final List<Article> articles = articlesMock();
 
     @Container
-    private static PostgreSQLContainer postgresqlContainer = new PostgreSQLContainer(POSTGRESQL_IMAGE)
-            .withDatabaseName(DATABASE_NAME)
-            .withPassword(DATABASE_PASSWORD)
-            .withUsername(DATABASE_USERNAME);
+    private static MongoDBContainer mongoDBContainer = new MongoDBContainer(MONGODB_IMAGE);
+
+    static {
+        mongoDBContainer.start();
+    }
 
     @DynamicPropertySource
     public static void overrideProps(DynamicPropertyRegistry registry){
-        registry.add("spring.datasource.url", postgresqlContainer::getJdbcUrl);
-        registry.add("spring.datasource.username", postgresqlContainer::getUsername);
-        registry.add("spring.datasource.password", postgresqlContainer::getPassword);
+        registry.add("spring.data.mongodb.uri", mongoDBContainer::getReplicaSetUrl);
     }
 
     @Autowired
     private ArticleRepository articleRepository;
 
-    private final List<Long> VALID_IDS = List.of(1L, 2L, 3L);
+    @BeforeAll
+    public void beforeAll() {
+        this.articleRepository.saveAll(articles);
+    }
+
+    @AfterAll
+    public void afterAll() {
+        this.articleRepository.deleteAll();
+    }
 
     @Test
-    @DisplayName("Test JSONB use mapping")
-    public void testJSONBMapping() {
-        var article = this.articleRepository.findById(VALID_IDS.get(0)).get();
+    @DisplayName("Test 1 - If MongoDB container is running")
+    public void testContainerIsRunning() {
+        assertTrue(mongoDBContainer.isRunning());
+    }
 
-        assertNotNull(article);
-        assertNotNull(article.getLaunches());
-        assertEquals("launchID1", article.getLaunches().get(0).getId());
-        assertEquals("launch1", article.getLaunches().get(0).getProvider());
-        assertNotNull(article.getEvents());
+    @Test
+    @DisplayName("Test 2 - Return 3 articles and their launches/events")
+    public void mustReturn2Articles() {
+        var articles = this.articleRepository.findAll();
+
+        assertNotNull(articles);
+        assertEquals(this.articles.size(), this.articleRepository.findAll().size());
+        for (Article article: articles) {
+            assertNotNull(article.getId());
+            assertNotNull(article.getCreatedAt());
+            assertNotNull(article.getLaunches());
+            assertNotNull(article.getEvents());
+        }
     }
 
 }

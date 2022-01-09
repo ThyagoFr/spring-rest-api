@@ -1,14 +1,19 @@
-package github.thyago.spaceflightnewsintegration.domain.entity;
+package github.thyago.spaceflightnewsintegration.service.spaceflightapi.response;
 
 import github.thyago.spaceflightnewsintegration.domain.model.Event;
 import github.thyago.spaceflightnewsintegration.domain.model.Launch;
-import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.List;
 
-@Document(collection = "articles")
-public class Article extends BaseEntity {
+public class ArticleResponse implements Serializable {
+
+    private static final long serialVersionUID = -4183333662322940728L;
+
+    private String id;
+
+    private String createdAt;
 
     private boolean featured;
 
@@ -28,7 +33,23 @@ public class Article extends BaseEntity {
 
     private List<Event> events;
 
-    public Article() {
+    public ArticleResponse() {
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public String getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(String createdAt) {
+        this.createdAt = createdAt;
     }
 
     public boolean isFeatured() {
@@ -102,5 +123,4 @@ public class Article extends BaseEntity {
     public void setEvents(List<Event> events) {
         this.events = events;
     }
-
 }

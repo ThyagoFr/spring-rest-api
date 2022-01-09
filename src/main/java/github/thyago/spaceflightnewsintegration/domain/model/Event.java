@@ -1,19 +1,19 @@
-package github.thyago.spaceflightnewsintegration.domain.entity;
+package github.thyago.spaceflightnewsintegration.domain.model;
 
 import java.io.Serializable;
 
-public class Launch implements Serializable {
+public class Event implements Serializable {
 
-    private static final long serialVersionUID = 2025789295116038751L;
+    private static final long serialVersionUID = -2042989300326167656L;
 
     private String id;
 
     private String provider;
 
-    public Launch() {
+    public Event() {
     }
 
-    public Launch(String id, String provider) {
+    public Event(String id, String provider) {
         this.id = id;
         this.provider = provider;
     }

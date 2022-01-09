@@ -1,1 +1,22 @@
+spring:
+  main:
+    banner-mode: off
+  application:
+    name: space-flight-news-integration
+  data:
+    mongodb:
+      uri: mongodb://thyagofr:password@localhost:27017/test?authSource=admin
+      database: test
+      authentication-database: admin
 
+scheduling:
+  enable: true
+  fix-rate: 3600000
+
+space:
+  flight:
+    news-api:
+      url: https://api.spaceflightnewsapi.net/v3/articles
+
+server:
+  port: 8080
