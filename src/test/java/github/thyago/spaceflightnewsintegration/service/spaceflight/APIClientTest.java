@@ -1,12 +1,14 @@
 package github.thyago.spaceflightnewsintegration.service.spaceflight;
 
-import github.thyago.spaceflightnewsintegration.service.spaceflightapi.APIClient;
+import github.thyago.spaceflightnewsintegration.service.spaceflightapi.client.APIClient;
 import github.thyago.spaceflightnewsintegration.service.spaceflightapi.response.ArticleResponse;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @SpringBootTest
 public class APIClientTest {

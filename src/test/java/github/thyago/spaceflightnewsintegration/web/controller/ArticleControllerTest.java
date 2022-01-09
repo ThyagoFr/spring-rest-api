@@ -3,13 +3,16 @@ package github.thyago.spaceflightnewsintegration.web.controller;
 import github.thyago.spaceflightnewsintegration.domain.entity.Article;
 import github.thyago.spaceflightnewsintegration.repository.ArticleRepository;
 import github.thyago.spaceflightnewsintegration.web.dto.ArticleDTO;
-import github.thyago.spaceflightnewsintegration.web.dto.ErrorResponse;
-import org.junit.jupiter.api.*;
+import io.restassured.http.ContentType;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.MediaType;
+import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.MongoDBContainer;
@@ -19,12 +22,19 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import java.util.List;
 
 import static github.thyago.spaceflightnewsintegration.util.ArticlesMock.articlesMock;
+import static io.restassured.RestAssured.basePath;
+import static io.restassured.RestAssured.given;
+import static io.restassured.RestAssured.port;
 import static java.time.LocalDateTime.now;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
-import static org.springframework.http.HttpStatus.*;
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
+import static org.springframework.http.HttpStatus.CREATED;
+import static org.springframework.http.HttpStatus.NOT_FOUND;
+import static org.springframework.http.HttpStatus.NO_CONTENT;
+import static org.springframework.http.HttpStatus.OK;
 
 @SpringBootTest(webEnvironment = RANDOM_PORT)
 @Testcontainers
@@ -40,10 +50,12 @@ public class ArticleControllerTest {
         mongoDBContainer.start();
     }
 
-    @DynamicPropertySource
-    public static void overrideProps(DynamicPropertyRegistry registry){
-        registry.add("spring.data.mongodb.uri", mongoDBContainer::getReplicaSetUrl);
-    }
+    private final List<Article> articles = articlesMock();
+
+    private final String ARTICLE_BASE_URL = "/articles";
+
+    @LocalServerPort
+    private int serverPort;
 
     @Autowired
     private ArticleRepository articleRepository;
@@ -51,12 +63,15 @@ public class ArticleControllerTest {
     @Autowired
     private TestRestTemplate restTemplate;
 
-    private final List<Article> articles = articlesMock();
-
-    private final String ARTICLE_BASE_URL = "/articles";
+    @DynamicPropertySource
+    public static void overrideProps(DynamicPropertyRegistry registry) {
+        registry.add("spring.data.mongodb.uri", mongoDBContainer::getReplicaSetUrl);
+    }
 
     @BeforeAll
     void setup() {
+        port = this.serverPort;
+        basePath = this.ARTICLE_BASE_URL;
         this.articleRepository.saveAll(this.articles);
     }
 
@@ -71,17 +86,15 @@ public class ArticleControllerTest {
         // Given
         var article = this.articles.get(0);
 
-        // Act
-        var response = this.restTemplate.getForEntity(this.ARTICLE_BASE_URL + "/{id}", ArticleDTO.class, article.getId());
-
-        // Assert
-        assertEquals(OK, response.getStatusCode());
-        assertEquals(MediaType.APPLICATION_JSON, response.getHeaders().getContentType());
-
-        var body = response.getBody();
-        assertNotNull(body);
-        assertEquals(article.getTitle(), body.getTitle());
-        assertEquals(article.getId(), body.getId());
+        // Act - Assert
+        given()
+                .when()
+                .get("/{id}", article.getId())
+                .then()
+                .statusCode(OK.value())
+                .contentType(ContentType.JSON)
+                .body("id", equalTo(article.getId()))
+                .body("title", equalTo(article.getTitle()));
     }
 
     @Test
@@ -90,12 +103,13 @@ public class ArticleControllerTest {
         // Given
         var articleID = "0";
 
-        // Act
-        var response = this.restTemplate.getForEntity(this.ARTICLE_BASE_URL + "/{id}", ArticleDTO.class, articleID);
-
-        // Assert
-        assertEquals(NOT_FOUND, response.getStatusCode());
-        assertEquals(MediaType.APPLICATION_JSON, response.getHeaders().getContentType());
+        // Act - Assert
+        given()
+                .when()
+                .get("/{id}", articleID)
+                .then()
+                .statusCode(NOT_FOUND.value())
+                .contentType(ContentType.JSON);
     }
 
     @Test
@@ -104,16 +118,12 @@ public class ArticleControllerTest {
         // Given
         var article = this.articles.get(0);
 
-        // Act
-        var response = this.restTemplate.exchange(
-                this.ARTICLE_BASE_URL + "/{id}",
-                HttpMethod.DELETE,
-                null,
-                Void.class,
-                article.getId());
-
-        // Assert
-        assertEquals(NO_CONTENT, response.getStatusCode());
+        // Act - Assert
+        given()
+                .when()
+                .delete("/{id}", article.getId())
+                .then()
+                .statusCode(NO_CONTENT.value());
     }
 
     @Test
@@ -122,16 +132,13 @@ public class ArticleControllerTest {
         // Given
         var articleID = "0";
 
-        // Act
-        var response = this.restTemplate.exchange(
-                this.ARTICLE_BASE_URL + "/{id}",
-                HttpMethod.DELETE,
-                null,
-                ErrorResponse.class,
-                articleID);
-
-        // Assert
-        assertEquals(NOT_FOUND, response.getStatusCode());
+        // Act - Assert
+        given()
+                .when()
+                .delete("/{id}", articleID)
+                .then()
+                .statusCode(NOT_FOUND.value())
+                .contentType(ContentType.JSON);
     }
 
     @Test
@@ -139,39 +146,44 @@ public class ArticleControllerTest {
     public void createValidArticle() {
         // Given
         var article = new ArticleDTO();
-        article.setTitle("New Article");
+        article.setTitle("New Article with more than 10 characters");
         article.setFeatured(true);
-        article.setImageUrl("imageURL");
-        article.setNewsSite("new_site");
+        article.setUrl("url.com");
+        article.setNewsSite("newSite");
         article.setPublishedAt(now());
 
-        // Act
-        var response = this.restTemplate.postForEntity(this.ARTICLE_BASE_URL, article, ArticleDTO.class);
-
-        // Assert
-        assertEquals(CREATED, response.getStatusCode());
-
-        var body = response.getBody();
-        assertNotNull(body);
-        assertNotNull(body.getId());
-        assertEquals(article.getTitle(), body.getTitle());
-        assertEquals(article.isFeatured(), body.isFeatured());
-        assertEquals(article.getImageUrl(), body.getImageUrl());
-        assertEquals(article.getPublishedAt(), body.getPublishedAt());
+        // Act - Assert
+        given()
+                .contentType(ContentType.JSON)
+                .body(article)
+                .when()
+                .post("")
+                .then()
+                .contentType(ContentType.JSON)
+                .statusCode(CREATED.value())
+                .body("id", notNullValue())
+                .body("title", equalTo(article.getTitle()))
+                .body("featured", equalTo(article.isFeatured()))
+                .body("url", equalTo(article.getUrl()))
+                .body("createdAt", notNullValue());
     }
 
     @Test
-    @DisplayName("Test 5 - Create an invalid article(empty title) must return bad request")
+    @DisplayName("Test 6 - Create an invalid article(empty title) must return bad request")
     public void createInvalidArticle() {
         // Given
         var article = new ArticleDTO();
         article.setTitle("");
 
-        // Act
-        var response = this.restTemplate.postForEntity(this.ARTICLE_BASE_URL, article, ArticleDTO.class);
-
-        // Assert
-        assertEquals(BAD_REQUEST, response.getStatusCode());
+        // Act - Assert
+        given()
+                .contentType(ContentType.JSON)
+                .body(article)
+                .when()
+                .post("")
+                .then()
+                .contentType(ContentType.JSON)
+                .statusCode(BAD_REQUEST.value());
     }
 
 }

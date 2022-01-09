@@ -3,9 +3,9 @@ package github.thyago.spaceflightnewsintegration.web.dto;
 import github.thyago.spaceflightnewsintegration.domain.model.Event;
 import github.thyago.spaceflightnewsintegration.domain.model.Launch;
 
-import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -22,7 +22,7 @@ public class ArticleDTO implements Serializable {
     private Boolean featured;
 
     @NotBlank(message = "user must provide title property")
-    @Min(value = 10, message = "user must provide a title with more than 10 characters")
+    @Size(min = 10, max = 255, message = "user must provide a title with more than 10 characters")
     private String title;
 
     @NotBlank(message = "user must provide url property")
@@ -32,7 +32,6 @@ public class ArticleDTO implements Serializable {
 
     private String newsSite;
 
-    @NotBlank(message = "user must provide summary property")
     private String summary;
 
     private LocalDateTime publishedAt;

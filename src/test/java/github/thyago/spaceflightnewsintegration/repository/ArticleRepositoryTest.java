@@ -1,7 +1,11 @@
 package github.thyago.spaceflightnewsintegration.repository;
 
 import github.thyago.spaceflightnewsintegration.domain.entity.Article;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.mongo.embedded.EmbeddedMongoAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest;
@@ -14,7 +18,9 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import java.util.List;
 
 import static github.thyago.spaceflightnewsintegration.util.ArticlesMock.articlesMock;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS;
 
 @Testcontainers
@@ -24,8 +30,6 @@ public class ArticleRepositoryTest {
 
     private static String MONGODB_IMAGE = "mongo:4.4.2";
 
-    private final List<Article> articles = articlesMock();
-
     @Container
     private static MongoDBContainer mongoDBContainer = new MongoDBContainer(MONGODB_IMAGE);
 
@@ -33,13 +37,15 @@ public class ArticleRepositoryTest {
         mongoDBContainer.start();
     }
 
-    @DynamicPropertySource
-    public static void overrideProps(DynamicPropertyRegistry registry){
-        registry.add("spring.data.mongodb.uri", mongoDBContainer::getReplicaSetUrl);
-    }
+    private final List<Article> articles = articlesMock();
 
     @Autowired
     private ArticleRepository articleRepository;
+
+    @DynamicPropertySource
+    public static void overrideProps(DynamicPropertyRegistry registry) {
+        registry.add("spring.data.mongodb.uri", mongoDBContainer::getReplicaSetUrl);
+    }
 
     @BeforeAll
     public void beforeAll() {
@@ -64,7 +70,7 @@ public class ArticleRepositoryTest {
 
         assertNotNull(articles);
         assertEquals(this.articles.size(), this.articleRepository.findAll().size());
-        for (Article article: articles) {
+        for (Article article : articles) {
             assertNotNull(article.getId());
             assertNotNull(article.getCreatedAt());
             assertNotNull(article.getLaunches());

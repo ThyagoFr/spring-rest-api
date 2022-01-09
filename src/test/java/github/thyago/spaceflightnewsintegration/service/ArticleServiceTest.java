@@ -17,13 +17,13 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 public class ArticleServiceTest {
 
+    private static final String INVALID_ID = "0";
+
     @Mock
     private ArticleRepository articleRepository;
 
     @InjectMocks
     private ArticleService articleService;
-
-    private static final String INVALID_ID = "0";
 
     @Test
     @DisplayName("Should throw ArticleNotFoundException when article repository return empty optional")

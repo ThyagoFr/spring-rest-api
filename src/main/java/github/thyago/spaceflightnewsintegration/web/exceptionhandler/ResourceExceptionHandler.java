@@ -32,7 +32,7 @@ public class ResourceExceptionHandler {
     @ResponseStatus(value = BAD_REQUEST)
     public ErrorResponse handleMethodArgumentNotValidException(MethodArgumentNotValidException ex, HttpServletRequest request) {
         var message = new ErrorResponse();
-        message.setMessage(ex.getMessage());
+        message.setMessage("There are some errors in user input data");
         message.setTimestamp(now());
         message.setPath(request.getRequestURI());
         message.setErrors(new HashMap<>());

@@ -1,4 +1,4 @@
-package github.thyago.spaceflightnewsintegration.service.spaceflightapi;
+package github.thyago.spaceflightnewsintegration.service.spaceflightapi.client;
 
 import github.thyago.spaceflightnewsintegration.service.spaceflightapi.response.ArticleResponse;
 import github.thyago.spaceflightnewsintegration.service.spaceflightapi.response.CountArticlesResponse;

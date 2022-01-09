@@ -25,21 +25,21 @@ public class ArticleService {
     }
 
     public Article findByID(String ID) {
-        return this.articleRepository.findById(ID).orElseThrow( () -> {
+        return this.articleRepository.findById(ID).orElseThrow(() -> {
             throw new ArticleNotFound(format("Article with ID %s not found", ID));
         });
     }
 
-    public Article create(Article article){
+    public Article create(Article article) {
         return this.articleRepository.save(article);
     }
 
-    public Article update(String ID, Article article){
+    public Article update(String ID, Article article) {
         var foundArticle = this.findByID(ID);
         return this.articleRepository.save(article);
     }
 
-    public void updateInBatch(List<Article> articles){
+    public void updateInBatch(List<Article> articles) {
         this.articleRepository.saveAll(articles);
     }
 
